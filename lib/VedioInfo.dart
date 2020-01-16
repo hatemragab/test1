@@ -1,6 +1,3 @@
-import 'package:adhara_socket_io/manager.dart';
-import 'package:adhara_socket_io/options.dart';
-import 'package:adhara_socket_io/socket.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +5,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import 'CommentModel.dart';
 import 'Constants.dart';
+
+import 'package:flutter_socket_io/flutter_socket_io.dart';
+import 'package:flutter_socket_io/socket_io_manager.dart';
 
 class VedioInfo extends StatefulWidget {
   String user_id;
@@ -25,17 +25,20 @@ class VedioInfo extends StatefulWidget {
 
 class _VedioInfoState extends State<VedioInfo> {
   var commentController = TextEditingController();
-  SocketIOManager manager;
-  SocketIO socket;
+
+  // SocketIOManager manager;
+  // SocketIO socket;
+  SocketIO socketIO;
   var url = '${Constants.SERVERURL}comments/fetch_all';
   String URI = "${Constants.SOCKETURL}";
   List<CommentModel> _listComments = [];
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    manager = SocketIOManager();
+    // manager = SocketIOManager();
     initSocket();
     getLastComments();
   }
@@ -43,12 +46,14 @@ class _VedioInfoState extends State<VedioInfo> {
   @override
   void dispose() {
     super.dispose();
+    _unSubscribes();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: Text('comments'),
       ),
       body: Container(
@@ -105,7 +110,7 @@ class _VedioInfoState extends State<VedioInfo> {
                     onPressed: () {
                       addComment(widget.user_name, widget.user_id, widget.subId,
                           commentController.text);
-                      // commentController.text='';
+                      commentController.text = '';
                     },
                     icon: Icon(Icons.send),
                   )
@@ -118,23 +123,52 @@ class _VedioInfoState extends State<VedioInfo> {
     );
   }
 
+  _socketStatus(dynamic data) {
+    print("Socket status: " + data);
+  }
+
   void initSocket() async {
-    socket = await manager.createInstance(
-        SocketOptions(URI, nameSpace: "/", query: {'forceNew': 'true'}));
-    socket.on('received', (data) {
-      print('dataaaaaaa is $data');
+    socketIO = SocketIOManager().createSocketIO(
+        Constants.SOCKETURL, "/api/comments",
+        socketStatusCallback: _socketStatus);
+
+    socketIO.init();
+    socketIO.subscribe('connection', () {
+      print('connected');
     });
-    socket.onConnect((data) {
-      print("connected...");
-    });
-    socket.connect();
+
+
+
+    if (socketIO != null) {
+      socketIO.subscribe("received", _onReceiveCommentMessage);
+    }
+
+    socketIO.connect();
+//    socket = await manager.createInstance(
+//        SocketOptions(URI, nameSpace: "/", query: {'forceNew': 'true'}));
+//    socket.on('received', (data) {
+//      print('dataaaaaaa is $data');
+//    });
+//    socket.onConnect((data) {
+//      print("connected...");
+//    });
+//    socket.on('disconnect',(s){
+//      print("dis connected...");
+//    });
+//    socket.connect();
+  }
+
+  _unSubscribes() {
+    if (socketIO != null) {
+      socketIO.destroy();
+    }
   }
 
   void getLastComments() async {
-    //5e1a49b16373951040407583
-    //5e1b30fc9db0a512c09b8ac1
+    //5e1a49b16373951040407583  local
+    //5e1b30fc9db0a512c09b8ac1  server
     var response =
-        await http.post(url, body: {'subcat_id': '5e1a49b16373951040407583'});
+        await http.post(url, body: {'subcat_id': widget.subId});
     var jsonResponse = await convert.jsonDecode(response.body);
     //print('responseeeeeeeeeeeeeeeee is $jsonResponse');
     bool error = jsonResponse['error'];
@@ -144,7 +178,9 @@ class _VedioInfoState extends State<VedioInfo> {
       List<CommentModel> temp = [];
       for (int i = 0; i < data.length; i++) {
         temp.add(CommentModel(
-            name: data[i]['user_id']['name'], comment: data[i]['comment']));
+            name: data[i]['user_id']['name'],
+            comment: data[i]['comment'],
+            user_img: 'img.png'));
       }
       setState(() {
         _listComments = temp;
@@ -154,12 +190,32 @@ class _VedioInfoState extends State<VedioInfo> {
 
   void addComment(String name, String user_id, String subId, String comment) {
     List<CommentModel> list_comments = [];
-    list_comments.add(CommentModel(name: name, comment: comment));
+    list_comments
+        .add(CommentModel(name: name, comment: comment, user_img: "img.png"));
     // Map<String, String> myData = {name: name, comment: comment};
+    //"name":"$name",
+    String data =
+        '{"user_id":"$user_id","subId":"$subId","comment":"$comment","user_name":"$name","user_img":"img.png"}';
+    socketIO.sendMessage('new_comment', data);
 
-    socket.emit('new_comment', [name, user_id, subId, comment]);
     setState(() {
       _listComments.add(new CommentModel(name: name, comment: comment));
     });
   }
+
+
+  void _onReceiveCommentMessage(dynamic message)  {
+    print("Message from UFO: " + message);
+  var data=   convert.jsonDecode(message);
+
+    var model = CommentModel(
+        comment: "${data['comment']}",
+        name: '${data['user_name']}',
+        user_img: '${data['user_img']}');
+    setState(() {
+
+      _listComments.add(model);
+    });
+  }
+
 }

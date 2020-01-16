@@ -3,6 +3,6 @@ import 'package:test1/Login.dart';
 
 import 'home.dart';
 
-void main() => runApp(MaterialApp(
+void main() => runApp(MaterialApp(debugShowCheckedModeBanner: false,
       home: Login(),
     ));
