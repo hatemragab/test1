@@ -45,8 +45,9 @@ class _VedioInfoState extends State<VedioInfo> {
 
   @override
   void dispose() {
-    super.dispose();
     _unSubscribes();
+    super.dispose();
+
   }
 
   @override
@@ -160,7 +161,7 @@ class _VedioInfoState extends State<VedioInfo> {
 
   _unSubscribes() {
     if (socketIO != null) {
-      socketIO.destroy();
+      socketIO.disconnect();
     }
   }
 
