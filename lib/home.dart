@@ -69,9 +69,8 @@ class _HomeState extends State<Home> {
     //local 5e1a49b16373951040407583
     //server 5e1cd058caa4330017769d7c
     var response =
-        await http.post(url, body: {'cat_id': '5e1cd058caa4330017769d7c'});
+        await http.post(url, body: {'cat_id': '5e1a49b16373951040407583'});
     var jsonResponse = await convert.jsonDecode(response.body);
-print('ddddddddd$jsonResponse');
     bool error = jsonResponse['error'];
     if (error) {
     } else {

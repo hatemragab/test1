@@ -1,12 +1,13 @@
 class Constants{
 
-//  static const PORT = 3000;
-//  static const SERVERURL = 'http://192.168.43.49:$PORT/api/';
+  static const PORT = 3000;
+  static const IP ='192.168.1.4';
+  static const SERVERURL = 'http://$IP:$PORT/api/';
+
+  static var SOCKETURL = 'http://$IP:$PORT';
+
+//  static const SERVERURL = 'https://yourtech1.herokuapp.com/api/';
 //
-//  static var SOCKETURL = 'http://192.168.43.49:$PORT';
-
-  static const SERVERURL = 'https://yourtech1.herokuapp.com/api/';
-
-  static var SOCKETURL = 'https://yourtech1.herokuapp.com/';
+//  static var SOCKETURL = 'https://yourtech1.herokuapp.com/';
 
 }

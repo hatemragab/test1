@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:adhara_socket_io/adhara_socket_io.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,9 +7,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import 'CommentModel.dart';
 import 'Constants.dart';
+import 'package:connectivity/connectivity.dart';
+import 'dart:io';
 
-import 'package:flutter_socket_io/flutter_socket_io.dart';
-import 'package:flutter_socket_io/socket_io_manager.dart';
+import 'connectionStatusSingleton.dart';
 
 class VedioInfo extends StatefulWidget {
   String user_id;
@@ -28,26 +31,43 @@ class _VedioInfoState extends State<VedioInfo> {
 
   // SocketIOManager manager;
   // SocketIO socket;
-  SocketIO socketIO;
+  SocketIOManager manager;
+  SocketIO socket;
   var url = '${Constants.SERVERURL}comments/fetch_all';
   String URI = "${Constants.SOCKETURL}";
   List<CommentModel> _listComments = [];
 
+  StreamSubscription _connectionChangeStream;
+
+  bool isOffline = false;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    // manager = SocketIOManager();
+    ConnectionStatusSingleton connectionStatus1 =
+        ConnectionStatusSingleton.getInstance();
+    connectionStatus1.initialize();
+    manager = SocketIOManager();
     initSocket();
+    ConnectionStatusSingleton connectionStatus =
+        ConnectionStatusSingleton.getInstance();
+    _connectionChangeStream =
+        connectionStatus.connectionChange.listen(connectionChanged);
     getLastComments();
+  }
+
+  void connectionChanged(dynamic hasConnection) {
+    if (hasConnection) {
+      // initSocket();
+    } else {
+      //_unSubscribes();
+    }
   }
 
   @override
   void dispose() {
     _unSubscribes();
     super.dispose();
-
   }
 
   @override
@@ -55,7 +75,7 @@ class _VedioInfoState extends State<VedioInfo> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('comments'),
+        title: (isOffline) ? new Text("Not connected") : new Text("Connected"),
       ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 10),
@@ -124,54 +144,42 @@ class _VedioInfoState extends State<VedioInfo> {
     );
   }
 
-  _socketStatus(dynamic data) {
-    print("Socket status: " + data);
-  }
-
   void initSocket() async {
-    socketIO = SocketIOManager().createSocketIO(
-        Constants.SOCKETURL, "/api/comments",
-        socketStatusCallback: _socketStatus);
 
-    socketIO.init();
-    socketIO.subscribe('connection', () {
-      print('connected');
+    socket = await manager.createInstance(SocketOptions(
+        //Socket IO server URI
+        URI,
+        nameSpace: "/api/comments",
+        //Enable or disable platform channel logging
+        enableLogging: false,
+        transports: [
+          Transports.WEB_SOCKET /*, Transports.POLLING*/
+        ] //Enable required transport
+        ));
+    socket.onConnect((data) {
+      print("connected...");
+
+      sendMessage();
     });
+    socket.on('received', (data) {
+      _onReceiveCommentMessage(data);
 
-
-
-    if (socketIO != null) {
-      socketIO.subscribe("received", _onReceiveCommentMessage);
-    }
-
-    socketIO.connect();
-//    socket = await manager.createInstance(
-//        SocketOptions(URI, nameSpace: "/", query: {'forceNew': 'true'}));
-//    socket.on('received', (data) {
-//      print('dataaaaaaa is $data');
-//    });
-//    socket.onConnect((data) {
-//      print("connected...");
-//    });
-//    socket.on('disconnect',(s){
-//      print("dis connected...");
-//    });
-//    socket.connect();
+    });
+    socket.connect();
   }
 
   _unSubscribes() {
-    if (socketIO != null) {
-      socketIO.disconnect();
+    if (socket != null) {
+      manager.clearInstance(socket);
     }
   }
 
   void getLastComments() async {
     //5e1a49b16373951040407583  local
     //5e1b30fc9db0a512c09b8ac1  server
-    var response =
-        await http.post(url, body: {'subcat_id': widget.subId});
+    var response = await http.post(url, body: {'subcat_id': widget.subId});
     var jsonResponse = await convert.jsonDecode(response.body);
-    //print('responseeeeeeeeeeeeeeeee is $jsonResponse');
+
     bool error = jsonResponse['error'];
     if (error) {
     } else {
@@ -193,30 +201,48 @@ class _VedioInfoState extends State<VedioInfo> {
     List<CommentModel> list_comments = [];
     list_comments
         .add(CommentModel(name: name, comment: comment, user_img: "img.png"));
-    // Map<String, String> myData = {name: name, comment: comment};
-    //"name":"$name",
-    String data =
-        '{"user_id":"$user_id","subId":"$subId","comment":"$comment","user_name":"$name","user_img":"img.png"}';
-    socketIO.sendMessage('new_comment', data);
 
+    String data =
+        '{"user_id":"$user_id","subId":"$subId","comment":"$comment","user_name":"$name","user_img":"img.png","room_name":"room 1"}';
+
+    var mainMap = Map<String, Object>();
+    mainMap['user_id']=user_id;
+    mainMap['subId']=subId;
+    mainMap['comment']=comment;
+    mainMap['user_name']=name;
+    mainMap['user_img']='img.png';
+    mainMap['room_name']=widget.subId;
+    String jsonString = convert.jsonEncode(mainMap);
+
+
+    // add [] for adhara lib.
+    // send data as string for flutter_socket_io
+    socket.emit('new_comment', [jsonString]);
     setState(() {
       _listComments.add(new CommentModel(name: name, comment: comment));
     });
   }
 
+  void _onReceiveCommentMessage(String message) {
 
-  void _onReceiveCommentMessage(dynamic message)  {
-    print("Message from UFO: " + message);
-  var data=   convert.jsonDecode(message);
+
+     String msg=  message.replaceFirst("#","");
+     print("Message from UFO after: " + msg);
+     var data= convert.jsonDecode(msg);
 
     var model = CommentModel(
         comment: "${data['comment']}",
         name: '${data['user_name']}',
         user_img: '${data['user_img']}');
-    setState(() {
 
+
+    setState(() {
       _listComments.add(model);
     });
   }
 
+  void sendMessage() {
+    String data =widget.subId;
+    socket.emit("join", [data]);
+  }
 }
