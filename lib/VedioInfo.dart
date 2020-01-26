@@ -57,10 +57,15 @@ class _VedioInfoState extends State<VedioInfo> {
   }
 
   void connectionChanged(dynamic hasConnection) {
+    setState(() {
+      isOffline = !hasConnection;
+    });
     if (hasConnection) {
-      // initSocket();
+
+      //initSocket();
+
     } else {
-      //_unSubscribes();
+       _unSubscribes();
     }
   }
 
@@ -75,7 +80,7 @@ class _VedioInfoState extends State<VedioInfo> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: (isOffline) ? new Text("Not connected") : new Text("Connected"),
+        title: (isOffline) ? new Text("Not connected") : new Text(" Connected"),
       ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 10),
@@ -225,7 +230,6 @@ class _VedioInfoState extends State<VedioInfo> {
 
   void _onReceiveCommentMessage(String message) {
 
-
      String msg=  message.replaceFirst("#","");
      print("Message from UFO after: " + msg);
      var data= convert.jsonDecode(msg);
@@ -240,7 +244,6 @@ class _VedioInfoState extends State<VedioInfo> {
       _listComments.add(model);
     });
   }
-
   void sendMessage() {
     String data =widget.subId;
     socket.emit("join", [data]);
