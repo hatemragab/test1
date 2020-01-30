@@ -3,7 +3,9 @@ class CommentModel{
   String comment;
   String user_img;
 
-  CommentModel({this.name, this.comment,this.user_img});
+  String sender_id;
+
+  CommentModel({this.name, this.comment,this.user_img,this.sender_id});
 
 
 }

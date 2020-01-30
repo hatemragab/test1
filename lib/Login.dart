@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,15 +6,20 @@ import 'package:test1/home.dart';
 import 'dart:convert' as convert;
 import 'Register.dart';
 
+
+
 class Login extends StatefulWidget {
   @override
   _LoginState createState() => _LoginState();
 }
 
 class _LoginState extends State<Login> {
+
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
   var url = '${Constants.SERVERURL}user/login';
+
+
 
   @override
   void initState() {
@@ -23,6 +27,8 @@ class _LoginState extends State<Login> {
     super.initState();
     emailController.text = "hatemragap5@gmail.com";
     passwordController.text = "123456";
+
+
   }
 
   @override
@@ -111,4 +117,6 @@ class _LoginState extends State<Login> {
           .push(MaterialPageRoute(builder: (_) => Home(id, name)));
     }
   }
+
+
 }
