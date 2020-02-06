@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:test1/CommentModel.dart';
+import 'package:test1/dataModels/CommentModel.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
-import 'Constants.dart';
-import 'SubCatsModel.dart';
-import 'VedioInfo.dart';
+import '../utils/Constants.dart';
+import '../dataModels/SubCatsModel.dart';
+import 'VideoInfo.dart';
 
 class Home extends StatefulWidget {
   String id;
@@ -46,7 +46,7 @@ class _HomeState extends State<Home> {
                   ListTile(
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => VedioInfo(widget.id, widget.name,_listSubCats[i].id,_listSubCats[i].vedioname,_listSubCats[i].vedioimg)));
+                          builder: (_) => VideoInfo(widget.id, widget.name,_listSubCats[i].id,_listSubCats[i].vedioname,_listSubCats[i].vedioimg)));
                     },
                     title: Text("${_listSubCats[i].vedioname}"),
                   ),
@@ -69,7 +69,7 @@ class _HomeState extends State<Home> {
     //local 5e1a49b16373951040407583
     //server 5e1cd058caa4330017769d7c
     var response =
-        await http.post(url, body: {'cat_id': '5e1a49b16373951040407583'});
+        await http.post(url, body: {'cat_id': '5e1cd058caa4330017769d7c'});
     var jsonResponse = await convert.jsonDecode(response.body);
     bool error = jsonResponse['error'];
     if (error) {

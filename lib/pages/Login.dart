@@ -1,28 +1,41 @@
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:test1/utils/Constants.dart';
+import 'package:test1/pages/home.dart';
 import 'dart:convert' as convert;
-import 'Constants.dart';
-import 'Login.dart';
-import 'home.dart';
-class Register extends StatefulWidget {
+import 'Register.dart';
+
+
+
+class Login extends StatefulWidget {
   @override
-  _RegisterState createState() => _RegisterState();
+  _LoginState createState() => _LoginState();
 }
 
-class _RegisterState extends State<Register> {
+class _LoginState extends State<Login> {
 
-
-  var url = '${Constants.SERVERURL}user/create';
   var emailController = TextEditingController();
-  var nameController = TextEditingController();
-  var phoneController = TextEditingController();
   var passwordController = TextEditingController();
+  var url = '${Constants.SERVERURL}user/login';
+
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    emailController.text = "hatemragap5@gmail.com";
+    passwordController.text = "123456";
+
+
+  }
+
   @override
   Widget build(BuildContext context) {
-    return    Scaffold(
-      backgroundColor: Colors.grey,
+    return Scaffold(
       appBar: AppBar(
-        title: Text("Register"),
+        title: Text("login"),
         centerTitle: true,
       ),
       body: Center(
@@ -31,66 +44,55 @@ class _RegisterState extends State<Register> {
           child: ListView(
             children: <Widget>[
               SizedBox(
-                height: 15,
-              ),
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(hintText: "Name"),
-              ),
-              SizedBox(
-                height: 15,
+                height: 30,
               ),
               TextField(
                 controller: emailController,
                 decoration: InputDecoration(hintText: "Email"),
               ),
               SizedBox(
-                height: 15,
-              ),
-              TextField(
-                controller: phoneController,
-                decoration: InputDecoration(hintText: "Phone"),
-              ),
-              SizedBox(
-                height: 15,
+                height: 30,
               ),
               TextField(
                 controller: passwordController,
                 decoration: InputDecoration(hintText: "Password"),
               ),
               SizedBox(
-                height: 15,
+                height: 30,
               ),
               RaisedButton(
                 onPressed: () {
-                  startRegister(nameController.text,emailController.text,passwordController.text,phoneController.text);
+                  startLogin(emailController.text, passwordController.text);
                 },
-                child: Text("Register"),
+                child: Text("login"),
               ),
               SizedBox(
-                height: 15,
+                height: 30,
               ),
               InkWell(
                   onTap: () {
                     Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (_) => Login()));
+                        .push(MaterialPageRoute(builder: (_) => Register()));
                   },
                   child: Center(
                       child: Text(
-                        "I have account  ",
-                        style: TextStyle(color: Colors.white, fontSize: 20),
-                      )))
+                    "Create Account",
+                    style: TextStyle(color: Colors.blue, fontSize: 20),
+                  )))
             ],
           ),
         ),
       ),
     );
   }
-  void startRegister(String name,String email,String password,String phone) async {
-    var response =
-    await http.post(url, body: {'name':name,'email': email, 'password': password,'phone':phone});
+
+  void startLogin(String email, String password) async {
+    var response = await http.post(url,
+        body: {'email': email, 'password': password},
+    );
     var jsonResponse = await convert.jsonDecode(response.body);
     bool error = jsonResponse['error'];
+
     if (error) {
       showDialog(
           context: context,
@@ -107,12 +109,14 @@ class _RegisterState extends State<Register> {
             );
           });
     } else {
-      String id = jsonResponse['_id'];
-      String name = jsonResponse['name'];
-      String email = jsonResponse['email'];
+      String id = jsonResponse['data']['_id'];
+      String name = jsonResponse['data']['name'];
+      String email = jsonResponse['data']['email'];
 
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) => Home(id,name)));
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => Home(id, name)));
     }
-
   }
+
+
 }
