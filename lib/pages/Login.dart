@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test1/utils/Constants.dart';
 import 'package:test1/pages/home.dart';
 import 'dart:convert' as convert;
@@ -112,10 +113,18 @@ class _LoginState extends State<Login> {
       String id = jsonResponse['data']['_id'];
       String name = jsonResponse['data']['name'];
       String email = jsonResponse['data']['email'];
-
+      String chatId = jsonResponse['data']['chatId'];
+     // print('chatId isssssssssss  ${jsonResponse['data']['chatId']}');
+      saveData(id,name,email);
       Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => Home(id, name)));
+          .push(MaterialPageRoute(builder: (_) => Home(id, name,chatId)));
     }
+  }
+  void saveData(String id,String name,String email)async{
+    SharedPreferences sharedPreferences =await SharedPreferences.getInstance();
+    sharedPreferences.setString('id',id );
+    sharedPreferences.setString('name',name );
+    sharedPreferences.setString('email',email );
   }
 
 

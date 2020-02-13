@@ -18,6 +18,7 @@ class CommentsProvider with ChangeNotifier {
   bool isFristTime = false;
 
   void getAllComments() async {
+
     isFristTime = false;
     Map<String, dynamic> stringJson =
         await CommentsService.getAllComments(subId, limit);
@@ -60,22 +61,34 @@ class CommentsProvider with ChangeNotifier {
   }
 
   void loadMoreComments() async {
+
     ++page;
+
     CommentsService.getMoreData(subId, limit, page).then((data) {
-      listComments.addAll(data);
       loading = false;
-      notifyListeners();
+     if(!data['error']){
+       List list = data['data'];
+       totalCount = data['totalCount'];
+       List<CommentModel> _comments = list.map((json) => CommentModel.fromJson(json)).toList();
+
+       listComments.addAll(_comments);
+
+
+     }
+
+     notifyListeners();
+
     });
   }
 
   void onReceiveCommentMessage(CommentModel model) {
-    print('onReceiveCommentMessage wase cadedddddddddddddddddddddddddddd');
-    if(!isFristTime){
-      ++totalCount;
-      ++totalCount;
-    }else{
-      ++totalCount;
-    }
+//    print('onReceiveCommentMessage wase cadedddddddddddddddddddddddddddd');
+//    if(!isFristTime){
+//      ++totalCount;
+//      ++totalCount;
+//    }else{
+//      ++totalCount;
+//    }
     listComments.insert(0, model);
     notifyListeners();
   }

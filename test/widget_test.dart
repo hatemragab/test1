@@ -7,8 +7,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test1/Login.dart';
-import 'package:test1/home.dart';
+import 'package:test1/pages/Login.dart';
+import 'package:test1/pages/home.dart';
 
 import 'package:test1/main.dart';
 

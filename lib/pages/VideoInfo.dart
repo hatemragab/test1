@@ -62,6 +62,9 @@ class _VideoInfoState extends State<VideoInfo> {
 
 
     Provider.of<CommentsProvider>(context, listen: false).page = 1;
+
+
+
     Provider.of<CommentsProvider>(context, listen: false).getAllComments();
 
     ConnectionStatusSingleton connectionStatus1 =
@@ -123,7 +126,11 @@ class _VideoInfoState extends State<VideoInfo> {
         sender_id: '${data['sender_id']}');
 
     Provider.of<CommentsProvider>(context, listen: false)
+        .totalCount = int.parse(data['totalCount']);
+
+    Provider.of<CommentsProvider>(context, listen: false)
         .onReceiveCommentMessage(model);
+
   }
 
   Widget buildListMessage() {
@@ -153,10 +160,10 @@ class _VideoInfoState extends State<VideoInfo> {
         controller: listScrollController,
         padding: EdgeInsets.all(10.0),
         shrinkWrap: true,
-        itemCount: _listComments.length + 1,
+        itemCount: _listComments.length,
         itemBuilder: (context, index) {
-          print('index is $index while length is ${_listComments.length}');
-          print('total count is  $totalCount');
+        //  print('index is $index while length is ${_listComments.length}');
+          //print('total count is  $totalCount');
           if (index == totalCount ){
             return Container(
 
@@ -209,6 +216,7 @@ class _VideoInfoState extends State<VideoInfo> {
   @override
   void dispose() {
     _unSubscribes();
+    listScrollController.dispose();
     super.dispose();
   }
 
@@ -222,6 +230,7 @@ class _VideoInfoState extends State<VideoInfo> {
       // we have reached at the top of the list, we should make _loading = true
       if (max - offset < _loadingOffset && !_loading) {
         Provider.of<CommentsProvider>(context, listen: false).setLoading();
+        print('loading from listScrollController');
         Provider.of<CommentsProvider>(context, listen: false).loadMoreComments();
       }
     });
@@ -259,7 +268,7 @@ class _VideoInfoState extends State<VideoInfo> {
 
   void sendJoin() {
     String data = widget.subId;
-    socket.emit("join", [data]);
+    socket.emit("joinCommentsRoom", [data]);
   }
 
   Widget buildInput() {

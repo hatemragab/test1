@@ -31,7 +31,7 @@ class CommentsService {
     }
   }
 
-  static Future<List<CommentModel>> getMoreData(String subId,int limit,int page)async{
+  static Future<Map<String,dynamic>> getMoreData(String subId,int limit,int page)async{
     var url = '${Constants.SERVERURL}comments/fetch_all';
     try {
       var response = await http.post(url,
@@ -40,13 +40,13 @@ class CommentsService {
 
       bool err = jsonResponse['error'];
       if (!err) {
-        List data = jsonResponse['data'];
-        List<CommentModel> _comments =
-        data.map((json) => CommentModel.fromJson(json)).toList();
 
-        return _comments;
+        return jsonResponse;
+
+
       } else {
-        return [];
+
+        return {'error':true};
       }
     } catch (err) {
       throw err;
