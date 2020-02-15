@@ -134,8 +134,11 @@ class _RegisterState extends State<Register> {
       String id = jsonResponse['data']['_id'];
       String name = jsonResponse['data']['name'];
       String email = jsonResponse['data']['email'];
-      String chatId = jsonResponse['data']['chatId'];
+      String chatId = jsonResponse['chatId'];
     //  socket.emit('getOnlineUsers',[]);
+
+      print('chat id issssssssssssssssssssss $chatId');
+      print('chat res issssssssssssssssssssss $jsonResponse');
       saveData(id, name, email, chatId);
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (_) => Home(id, name, chatId)));

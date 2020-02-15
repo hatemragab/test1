@@ -38,7 +38,7 @@ class _MyChatDeatilPageState extends State<MyChatDetailPage> {
     super.initState();
     initSocket();
     _scrollController = ScrollController(initialScrollOffset: 0);
-    getLastMessages();
+     getLastMessages();
    // readLocalData();
     _focusNode = FocusNode();
     _focusNode.addListener(() {
@@ -99,6 +99,7 @@ class _MyChatDeatilPageState extends State<MyChatDetailPage> {
     mainMap['receiver_id'] = widget.user_id;
     mainMap['message'] = _txtController.text;
     mainMap['chat_id'] = widget.chatId;
+    mainMap['isUser'] = true;
     String jsonString = convert.jsonEncode(mainMap);
     socket.emit('new_message', jsonString);
 
@@ -228,8 +229,13 @@ class _MyChatDeatilPageState extends State<MyChatDetailPage> {
   }
 
   void sendJoinChat() {
-    String data = widget.chatId;
-    socket.emit("joinChat", [data]);
+   // String data = widget.chatId;
+    Map map = Map();
+    map['chatId'] =  widget.chatId;
+    map['isUser'] = true;
+    map['userId'] = widget.user_id;
+   var myJson =  convert.jsonEncode(map);
+    socket.emit("joinChat", myJson);
   }
 
   void _onReceiveMessage(msg) {
