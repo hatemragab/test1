@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:test1/pages/Login.dart';
+import 'package:test1/pages/NewLogonAndRgister/NewLogin.dart';
 import 'package:test1/providers/CommentsProvider.dart';
 import 'dart:io';
 import 'utils/connectionStatusSingleton.dart';
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Login(),
+        home: NewLogin(),
       ),
     );
   }
