@@ -1,8 +1,15 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
 import 'package:test1/style/theme.dart' as Theme;
+import 'package:test1/utils/Constants.dart';
+
+import '../home.dart';
 class SignUpPage extends StatefulWidget {
   @override
   _SignUpPageState createState() => _SignUpPageState();
@@ -24,8 +31,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _obscureTextSignup = true;
   bool _obscureTextSignupConfirm = true;
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -252,7 +257,11 @@ class _SignUpPageState extends State<SignUpPage> {
                           fontFamily: "WorkSansBold"),
                     ),
                   ),
-                  onPressed: () => startSignUp(),
+                  onPressed: () {
+                    startRegister(signupFullNameController.text,signupEmailController.text,signupPasswordController.text,signupPhoneController.text);
+
+                  }
+
                 ),
               ),
             ],
@@ -262,8 +271,35 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  void startSignUp() async {
 
+  void startRegister(String name, String email, String password, String phone) async {
+    ProgressDialog pr;
+    pr = new ProgressDialog(context,type: ProgressDialogType.Normal);
+    pr.style(message: 'please wait...');
+    pr.show();
+    var response = await http.post("${Constants.SERVERURL}user/create", body: {
+      'name': name,
+      'email': email,
+      'password': password,
+      'phone': phone
+    });
+    var jsonResponse = await convert.jsonDecode(response.body);
+    pr.hide();
+    bool error = jsonResponse['error'];
+    if (error) {
+      getDailog('${jsonResponse['data']}','Ok');
+    } else {
+      String id = jsonResponse['data']['_id'];
+      String name = jsonResponse['data']['name'];
+      String email = jsonResponse['data']['email'];
+      String chatId = jsonResponse['chatId'];
+      //  socket.emit('getOnlineUsers',[]);
+
+
+
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => Home(id, name, chatId)));
+    }
   }
 
   void _toggleSignup() {
@@ -291,11 +327,19 @@ class _SignUpPageState extends State<SignUpPage> {
     return showDialog(
         context: context,
         builder: (context) {
-
+          return new CupertinoAlertDialog(
+            content: Text(content),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text(FlatButtonText),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
         });
   }
 
-  void getAlert(String s) {
 
-  }
 }

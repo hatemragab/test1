@@ -1,10 +1,15 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:test1/style/theme.dart' as Theme;
+import 'package:test1/utils/Constants.dart';
 import 'package:test1/utils/bubble_indication_painter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
 
+import '../home.dart';
 import 'SignUpPage.dart';
 class NewLogin extends StatefulWidget {
   @override
@@ -36,6 +41,8 @@ class _NewLoginState extends State<NewLogin>   with SingleTickerProviderStateMix
     // TODO: implement initState
     super.initState();
     _pageController = PageController();
+    loginEmailController.text = "hatemragap5@gmail.com";
+    loginPasswordController.text = "123456";
   }
   @override
   Widget build(BuildContext context) {
@@ -292,7 +299,7 @@ class _NewLoginState extends State<NewLogin>   with SingleTickerProviderStateMix
                         ),
                       ),
                       onPressed: () {
-                        startlogin(loginEmailController.text,
+                        startLogin(loginEmailController.text,
                             loginPasswordController.text);
                       }),
                 ),
@@ -402,5 +409,62 @@ class _NewLoginState extends State<NewLogin>   with SingleTickerProviderStateMix
     });
   }
 
-  void startlogin(String text, String text2) {}
+
+  void startLogin(String email, String password) async {
+
+
+    var url = '${Constants.SERVERURL}user/login';
+    print('email is $email');
+    if (email.isEmpty) {
+
+
+      getDailog("يا اخي كيف تنسي البريد", "نسيت الله يخرب بيت الشيطان");
+
+    }else if (password.isEmpty){
+      getDailog("يا اخي كيف تنسي كلمه السر", "نسيت الله يخرب بيت الشيطان");
+
+    }else{
+      ProgressDialog pr;
+      pr = new ProgressDialog(context,type: ProgressDialogType.Normal);
+      pr.style(message: 'please wait...');
+      pr.show();
+      var response = await http.post(url,
+        body: {'email': email, 'password': password},
+      );
+      var jsonResponse = await convert.jsonDecode(response.body);
+      bool error = jsonResponse['error'];
+      pr.hide();
+      if (error) {
+        getDailog('${jsonResponse['data']}','ok');
+
+      } else {
+        String id = jsonResponse['data']['_id'];
+        String name = jsonResponse['data']['name'];
+        String email = jsonResponse['data']['email'];
+        String chatId = jsonResponse['data']['chatId'];
+
+
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => Home(id, name,chatId)));
+      }
+    }
+
+  }
+  getDailog(String content, String FlatButtonText) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return new CupertinoAlertDialog(
+            content: Text(content),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text(FlatButtonText),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        });
+  }
 }
