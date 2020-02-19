@@ -3,20 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test1/dataModels/UserModel.dart';
+import 'package:test1/providers/AuthProvider.dart';
 import 'package:test1/style/theme.dart' as Theme;
 import 'package:test1/utils/Constants.dart';
 import 'package:test1/utils/bubble_indication_painter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
-import '../home.dart';
+import '../SubCategory.dart';
 import 'SignUpPage.dart';
+import 'package:flutter_progress_dialog/flutter_progress_dialog.dart';
+
 class NewLogin extends StatefulWidget {
   @override
   _NewLoginState createState() => _NewLoginState();
 }
 
-class _NewLoginState extends State<NewLogin>   with SingleTickerProviderStateMixin{
+class _NewLoginState extends State<NewLogin>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final FocusNode myFocusNodeEmailLogin = FocusNode();
   final FocusNode myFocusNodePasswordLogin = FocusNode();
@@ -32,18 +39,18 @@ class _NewLoginState extends State<NewLogin>   with SingleTickerProviderStateMix
   Color left = Colors.black;
   Color right = Colors.white;
 
-  ProgressDialog pr;
-
   bool isLoggedIn;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    checkUserLogin();
     _pageController = PageController();
     loginEmailController.text = "hatemragap5@gmail.com";
     loginPasswordController.text = "123456";
   }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -122,7 +129,6 @@ class _NewLoginState extends State<NewLogin>   with SingleTickerProviderStateMix
   }
 
   _buildMenuBar(BuildContext context) {
-
     return Container(
       width: 300.0,
       height: 50.0,
@@ -307,9 +313,7 @@ class _NewLoginState extends State<NewLogin>   with SingleTickerProviderStateMix
           Padding(
             padding: EdgeInsets.only(top: 10.0),
             child: FlatButton(
-                onPressed: () {
-
-                },
+                onPressed: () {},
                 child: Text(
                   "تسجيل دخول كامدير",
                   style: TextStyle(
@@ -409,47 +413,53 @@ class _NewLoginState extends State<NewLogin>   with SingleTickerProviderStateMix
     });
   }
 
-
   void startLogin(String email, String password) async {
-
-
     var url = '${Constants.SERVERURL}user/login';
-    print('email is $email');
+
     if (email.isEmpty) {
-
-
       getDailog("يا اخي كيف تنسي البريد", "نسيت الله يخرب بيت الشيطان");
-
-    }else if (password.isEmpty){
+    } else if (password.isEmpty) {
       getDailog("يا اخي كيف تنسي كلمه السر", "نسيت الله يخرب بيت الشيطان");
+    } else {
+      showProgressDialog(loadingText: 'loading');
 
-    }else{
-      ProgressDialog pr;
-      pr = new ProgressDialog(context,type: ProgressDialogType.Normal);
-      pr.style(message: 'please wait...');
-      pr.show();
-      var response = await http.post(url,
+      var response = await http.post(
+        url,
         body: {'email': email, 'password': password},
       );
       var jsonResponse = await convert.jsonDecode(response.body);
       bool error = jsonResponse['error'];
-      pr.hide();
-      if (error) {
-        getDailog('${jsonResponse['data']}','ok');
+      dismissProgressDialog();
 
+      if (error) {
+        getDailog('${jsonResponse['data']}', 'ok');
       } else {
         String id = jsonResponse['data']['_id'];
         String name = jsonResponse['data']['name'];
         String email = jsonResponse['data']['email'];
+        String phone = jsonResponse['data']['phone'];
         String chatId = jsonResponse['data']['chatId'];
+       // String password = jsonResponse['data']['password'];
+        saveUserData(email, password);
+        Provider.of<AuthProvider>(context, listen: false).userModel = UserModel(
+            id: id,
+            name: name,
+            password: password,
+            email: email,
+            phone: phone,
+            chatId: chatId);
+
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (BuildContext context) =>
+                    SubCategory()),
+                (Route<dynamic> route) => false);
 
 
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (_) => Home(id, name,chatId)));
       }
     }
-
   }
+
   getDailog(String content, String FlatButtonText) {
     return showDialog(
         context: context,
@@ -466,5 +476,22 @@ class _NewLoginState extends State<NewLogin>   with SingleTickerProviderStateMix
             ],
           );
         });
+  }
+
+  void saveUserData(String email, String password) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setString('email', email);
+    sharedPreferences.setString('password', password);
+  }
+
+  void checkUserLogin() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String email = sharedPreferences.getString('email');
+    String password = sharedPreferences.getString('password');
+    if(email!=null&&password!=null){
+      startLogin(email, password);
+    }else{
+      print('one is null !');
+    }
   }
 }

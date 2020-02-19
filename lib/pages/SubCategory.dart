@@ -1,34 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:test1/dataModels/CommentModel.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import 'package:socket_io_client/socket_io_client.dart' as io;
+import 'package:test1/dataModels/UserModel.dart';
+import 'package:test1/providers/AuthProvider.dart';
 import '../utils/Constants.dart';
 import '../dataModels/SubCatsModel.dart';
 import 'MyChatDetailPage.dart';
 import 'VideoInfo.dart';
 
-class Home extends StatefulWidget {
-  String id;
-  String name;
-  String chatId;
+class SubCategory extends StatefulWidget {
 
-  Home(this.id, this.name,this.chatId);
+
+  SubCategory();
 
   @override
-  _HomeState createState() => _HomeState();
+  _SubCategoryState createState() => _SubCategoryState();
 }
 
-class _HomeState extends State<Home> {
+class _SubCategoryState extends State<SubCategory> {
   List<SubCatModel> _listSubCats = [];
+  UserModel userModel;
   io.Socket socket;
   var url = '${Constants.SERVERURL}category/get_sub';
   String URI = "${Constants.SOCKETURL}";
   @override
   void initState() {
-    // TODO: implement initState
-    super.initState();
 
+    super.initState();
+    userModel= Provider.of<AuthProvider>(context,listen: false).userModel;
+
+   print(' email isssssssss  ${userModel.email}');
     getVideoList();
     initSocket();
   }
@@ -46,7 +50,7 @@ class _HomeState extends State<Home> {
               ),
               onPressed: () {
                 Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => MyChatDetailPage(widget.chatId,widget.id)));
+                    MaterialPageRoute(builder: (_) => MyChatDetailPage(userModel.chatId,userModel.id)));
               })
         ],
       ),
@@ -62,8 +66,8 @@ class _HomeState extends State<Home> {
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (_) => VideoInfo(
-                              widget.id,
-                              widget.name,
+                             userModel.id,
+                             userModel.name,
                               _listSubCats[i].id,
                               _listSubCats[i].vedioname,
                               _listSubCats[i].vedioimg)));
@@ -99,7 +103,7 @@ class _HomeState extends State<Home> {
     //local 5e1a49b16373951040407583
     //server 5e1cd058caa4330017769d7c
     var response =
-        await http.post(url, body: {'cat_id': '5e1cd058caa4330017769d7c'});
+        await http.post(url, body: {'cat_id': '5e1a49b16373951040407583'});
     var jsonResponse = await convert.jsonDecode(response.body);
     bool error = jsonResponse['error'];
     if (error) {
@@ -120,7 +124,7 @@ class _HomeState extends State<Home> {
 
   void sendOnline() {
 
-    print('my id isssssssssssss${widget.id}');
-    socket.emit('goOnline', widget.id);
+    print('my id isssssssssssss${userModel.id}');
+    socket.emit('goOnline',userModel.id);
   }
 }

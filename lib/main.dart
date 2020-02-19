@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_progress_dialog/flutter_progress_dialog.dart';
 import 'package:provider/provider.dart';
-import 'package:test1/pages/Login.dart';
+
 import 'package:test1/pages/NewLogonAndRgister/NewLogin.dart';
+import 'package:test1/providers/AuthProvider.dart';
 import 'package:test1/providers/CommentsProvider.dart';
 import 'dart:io';
 import 'utils/connectionStatusSingleton.dart';
@@ -18,10 +20,15 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => CommentsProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(),
+        ),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: NewLogin(),
+      child: ProgressDialog(
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: NewLogin(),
+        ),
       ),
     );
   }

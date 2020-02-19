@@ -1,15 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_progress_dialog/flutter_progress_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:test1/dataModels/UserModel.dart';
+import 'package:test1/providers/AuthProvider.dart';
 import 'dart:convert' as convert;
 import 'package:test1/style/theme.dart' as Theme;
 import 'package:test1/utils/Constants.dart';
 
-import '../home.dart';
+import '../SubCategory.dart';
 class SignUpPage extends StatefulWidget {
   @override
   _SignUpPageState createState() => _SignUpPageState();
@@ -273,10 +277,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
 
   void startRegister(String name, String email, String password, String phone) async {
-    ProgressDialog pr;
-    pr = new ProgressDialog(context,type: ProgressDialogType.Normal);
-    pr.style(message: 'please wait...');
-    pr.show();
+
+    showProgressDialog(loadingText: 'loading');
     var response = await http.post("${Constants.SERVERURL}user/create", body: {
       'name': name,
       'email': email,
@@ -284,21 +286,32 @@ class _SignUpPageState extends State<SignUpPage> {
       'phone': phone
     });
     var jsonResponse = await convert.jsonDecode(response.body);
-    pr.hide();
+
     bool error = jsonResponse['error'];
+    dismissProgressDialog();
     if (error) {
+
       getDailog('${jsonResponse['data']}','Ok');
     } else {
+
       String id = jsonResponse['data']['_id'];
       String name = jsonResponse['data']['name'];
       String email = jsonResponse['data']['email'];
+      String phone = jsonResponse['data']['phone'];
+
       String chatId = jsonResponse['chatId'];
       //  socket.emit('getOnlineUsers',[]);
+      UserModel userModel = UserModel(id: id, name: name, password: password, email: email, phone: phone,chatId: chatId);
+      Provider.of<AuthProvider>(context, listen: false).userModel = userModel;
+      saveUserData(email,password);
+
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  SubCategory()),
+              (Route<dynamic> route) => false);
 
 
-
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => Home(id, name, chatId)));
     }
   }
 
@@ -334,6 +347,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 child: new Text(FlatButtonText),
                 onPressed: () {
                   Navigator.pop(context);
+
                 },
               ),
             ],
@@ -341,5 +355,9 @@ class _SignUpPageState extends State<SignUpPage> {
         });
   }
 
-
+void saveUserData (String email,String password)async{
+    SharedPreferences sharedPreferences =await SharedPreferences.getInstance();
+    sharedPreferences.setString('email',email);
+    sharedPreferences.setString('password',password);
+}
 }
