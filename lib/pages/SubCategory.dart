@@ -13,8 +13,8 @@ import 'VideoInfo.dart';
 
 class SubCategory extends StatefulWidget {
 
-
-  SubCategory();
+String cat_id;
+  SubCategory(this.cat_id);
 
   @override
   _SubCategoryState createState() => _SubCategoryState();
@@ -103,7 +103,7 @@ class _SubCategoryState extends State<SubCategory> {
     //local 5e1a49b16373951040407583
     //server 5e1cd058caa4330017769d7c
     var response =
-        await http.post(url, body: {'cat_id': '5e1a49b16373951040407583'});
+        await http.post(url, body: {'cat_id': widget.cat_id});
     var jsonResponse = await convert.jsonDecode(response.body);
     bool error = jsonResponse['error'];
     if (error) {

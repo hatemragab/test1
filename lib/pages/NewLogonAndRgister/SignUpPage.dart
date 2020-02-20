@@ -13,6 +13,7 @@ import 'dart:convert' as convert;
 import 'package:test1/style/theme.dart' as Theme;
 import 'package:test1/utils/Constants.dart';
 
+import '../Category.dart';
 import '../SubCategory.dart';
 class SignUpPage extends StatefulWidget {
   @override
@@ -293,7 +294,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
       getDailog('${jsonResponse['data']}','Ok');
     } else {
-
       String id = jsonResponse['data']['_id'];
       String name = jsonResponse['data']['name'];
       String email = jsonResponse['data']['email'];
@@ -308,10 +308,8 @@ class _SignUpPageState extends State<SignUpPage> {
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
               builder: (BuildContext context) =>
-                  SubCategory()),
+                  Category("")),
               (Route<dynamic> route) => false);
-
-
     }
   }
 
