@@ -1,16 +1,12 @@
 import 'package:flutter/foundation.dart';
 
 class SubCatModel {
-  final String id;
-  final String vedioname;
-  final String vedioimg;
+  String id;
+  String name;
+  String img;
+  int type;
 
-  SubCatModel(
-      {@required this.id, @required this.vedioname, @required this.vedioimg});
+  SubCatModel({this.id, this.name, this.img, this.type});
 
-  SubCatModel.fromJson(Map<String, dynamic> map)
-      : id = map['_id'],
-        vedioname = map['vedioname'],
-        vedioimg = map['vedioimg'];
 
 }

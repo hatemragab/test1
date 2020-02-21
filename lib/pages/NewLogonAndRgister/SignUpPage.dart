@@ -308,7 +308,7 @@ class _SignUpPageState extends State<SignUpPage> {
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
               builder: (BuildContext context) =>
-                  Category("")),
+                  Category( )),
               (Route<dynamic> route) => false);
     }
   }

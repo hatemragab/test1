@@ -10,18 +10,13 @@ class CategoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    print('cat mmmm is ${_categoryModel.name}');
+
+    return   InkWell(
       onTap: () {
-        if(_categoryModel.type){
 
           Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => Category(_categoryModel.id)));
-        }else{
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => SubCategory(_categoryModel.id)));
-        }
-
-
+              .push(MaterialPageRoute(builder: (_) => SubCategory(_categoryModel.id,_categoryModel.type)));
       },
       child: Container(
         child: GridTile(

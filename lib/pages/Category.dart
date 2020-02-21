@@ -7,10 +7,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
 class Category extends StatefulWidget {
-  String cat_id;
-
-  Category(this.cat_id);
-
   @override
   _CategoryState createState() => _CategoryState();
 }
@@ -85,8 +81,10 @@ class _CategoryState extends State<Category> {
                 height: 20,
               ),
               _listCategory.length == 0
-                  ?  Center(
-                      child:error_data==""? Text('No Category !'): CircularProgressIndicator(),
+                  ? Center(
+                      child: error_data == ""
+                          ? Text('No Category !')
+                          : CircularProgressIndicator(),
                     )
                   : Container(
                       child: GridView.builder(
@@ -112,73 +110,32 @@ class _CategoryState extends State<Category> {
   }
 
   void getCategorys() async {
+    var response = await http.get(
+      _url,
+    );
 
-    if(widget.cat_id==""){
-      var response = await http.get(
-        _url,
-      );
-
-      var jsonResponse = await convert.jsonDecode(response.body);
-
-      bool error = jsonResponse['error'];
-      if (!error) {
-        List data = jsonResponse['data'];
-        List<CategoryModel> temp = [];
-        for (int i = 0; i < data.length; i++) {
-          temp.add(CategoryModel(
-              id: data[i]['_id'],
-              name: data[i]['name'],
-              img: data[i]['img'],
-              type: data[i]['type'],
-              isLive: false));
-        }
-        setState(() {
-          _listCategory = temp;
-        });
-        temp = null;
-      } else {
-        setState(() {
-          error_data = jsonResponse['data'];
-        });
-
+    var jsonResponse = await convert.jsonDecode(response.body);
+    print(jsonResponse);
+    bool error = jsonResponse['error'];
+    if (!error) {
+      List data = jsonResponse['data'];
+      List<CategoryModel> temp = [];
+      for (int i = 0; i < data.length; i++) {
+        temp.add(CategoryModel(
+            id: data[i]['_id'],
+            name: data[i]['name'],
+            img: data[i]['img'],
+            type: data[i]['type'],
+            isLive: false));
       }
-
-    }else{
-      var url = '${Constants.SERVERURL}category/get_sub';
-      var response = await http.post(url, body: {'cat_id': widget.cat_id});
-
-      var jsonResponse = await convert.jsonDecode(response.body);
-
-      print(jsonResponse);
-      bool error = jsonResponse['error'];
-      if (!error) {
-
-        List data = jsonResponse['data'];
-        List<CategoryModel> temp = [];
-        for (int i = 0; i < data.length; i++) {
-          temp.add(CategoryModel(
-              id: data[i]['_id'],
-              name: data[i]['vedioname'],
-              img: data[i]['vedioimg'],
-              type: data[i]['type'],
-              isLive: false));
-        }
-        setState(() {
-          _listCategory = temp;
-        });
-        temp = null;
-
-
-      } else {
-        setState(() {
-          error_data = jsonResponse['data'];
-        });
-
-      }
-
+      setState(() {
+        _listCategory = temp;
+      });
+      temp = null;
+    } else {
+      setState(() {
+        error_data = jsonResponse['data'];
+      });
     }
-
-
-
   }
 }

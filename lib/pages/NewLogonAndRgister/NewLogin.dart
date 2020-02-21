@@ -453,7 +453,7 @@ class _NewLoginState extends State<NewLogin>
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
                 builder: (BuildContext context) =>
-                    Category("")),
+                    Category( )),
                 (Route<dynamic> route) => false);
       }
     }

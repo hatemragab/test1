@@ -7,6 +7,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:test1/dataModels/CommentModel.dart';
+import 'package:test1/dataModels/UserModel.dart';
+import 'package:test1/providers/AuthProvider.dart';
 import 'package:test1/providers/CommentsProvider.dart';
 import 'package:test1/streamModels/CommentsStream.dart';
 import 'dart:convert' as convert;
@@ -20,20 +22,20 @@ import '../utils/connectionStatusSingleton.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class VideoInfo extends StatefulWidget {
-  String user_id;
-  String user_name;
+
   String subId;
   String subName;
   String subImg;
 
   VideoInfo(
-      this.user_id, this.user_name, this.subId, this.subName, this.subImg);
+     this.subId, this.subName, this.subImg);
 
   @override
   _VideoInfoState createState() => _VideoInfoState();
 }
 
 class _VideoInfoState extends State<VideoInfo> {
+  UserModel _userModel;
   io.Socket socket;
   bool isLoading = false;
   bool error = false;
@@ -57,6 +59,7 @@ class _VideoInfoState extends State<VideoInfo> {
     super.initState();
 
     Provider.of<CommentsProvider>(context, listen: false).subId = widget.subId;
+      _userModel=  Provider.of<AuthProvider>(context, listen: false).userModel ;
 
 
 
@@ -180,7 +183,7 @@ class _VideoInfoState extends State<VideoInfo> {
   }
 
   Widget buildItem(int index, CommentModel listComment) {
-    if (listComment.sender_id == widget.user_id) {
+    if (listComment.sender_id == _userModel.id) {
       return Bubble(
         margin: BubbleEdges.only(top: 10),
         alignment: Alignment.topRight,
@@ -312,9 +315,9 @@ class _VideoInfoState extends State<VideoInfo> {
                   } else {
 
                     CommentModel c = CommentModel(
-                        name: widget.user_name,
+                        name: _userModel.name,
                         comment: textEditingController.text,
-                        sender_id: widget.user_id,
+                        sender_id:_userModel.id,
                         subId: widget.subId);
                     Provider.of<CommentsProvider>(context, listen: false)
                         .addComment(c);
