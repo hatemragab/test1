@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test1/dataModels/CategoryModel.dart';
-import 'package:test1/pages/Category.dart';
+import 'package:test1/pages/CategoryPage.dart';
 import 'package:test1/pages/SubCategory.dart';
 
 class CategoryItem extends StatelessWidget {

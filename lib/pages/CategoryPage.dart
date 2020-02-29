@@ -6,12 +6,12 @@ import 'package:test1/widgets/CategoryItem.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
-class Category extends StatefulWidget {
+class CategoryPage extends StatefulWidget {
   @override
-  _CategoryState createState() => _CategoryState();
+  _CategoryPageState createState() => _CategoryPageState();
 }
 
-class _CategoryState extends State<Category> {
+class _CategoryPageState extends State<CategoryPage> {
   List<CategoryModel> _listCategory = [];
   String _url = '${Constants.SERVERURL}category/fetch_all';
   String error_data = "";

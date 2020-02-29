@@ -13,7 +13,7 @@ import 'package:test1/utils/bubble_indication_painter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
-import '../Category.dart';
+import '../CategoryPage.dart';
 import '../SubCategory.dart';
 import 'SignUpPage.dart';
 import 'package:flutter_progress_dialog/flutter_progress_dialog.dart';
@@ -453,7 +453,7 @@ class _NewLoginState extends State<NewLogin>
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
                 builder: (BuildContext context) =>
-                    Category( )),
+                    CategoryPage( )),
                 (Route<dynamic> route) => false);
       }
     }

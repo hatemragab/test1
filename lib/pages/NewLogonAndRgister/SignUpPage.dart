@@ -13,7 +13,7 @@ import 'dart:convert' as convert;
 import 'package:test1/style/theme.dart' as Theme;
 import 'package:test1/utils/Constants.dart';
 
-import '../Category.dart';
+import '../CategoryPage.dart';
 import '../SubCategory.dart';
 class SignUpPage extends StatefulWidget {
   @override
@@ -308,7 +308,7 @@ class _SignUpPageState extends State<SignUpPage> {
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
               builder: (BuildContext context) =>
-                  Category( )),
+                  CategoryPage( )),
               (Route<dynamic> route) => false);
     }
   }
